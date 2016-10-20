@@ -1,6 +1,5 @@
 import Ember from 'ember';
 const { get, typeOf } = Ember;
-console.log('router actions');
 
 /**
  * getParameters

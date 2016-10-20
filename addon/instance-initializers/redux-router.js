@@ -36,15 +36,13 @@ export function initialize(app) {
   redux.addAddonReducer('@router', routeReducer);
 
   const replacementTransitionTo = function transitionTo(...args) {
-    console.log('dispatching', actions.requestTransition(navigator, args));
+    log('dispatching', actions.requestTransition(navigator, args));
     redux.dispatch(actions.requestTransition(navigator, args));
   };
   const replacementWillTransition = function willTransition(oldInfos, newInfos, transition) {
-    // console.log('will transition: ', oldInfos, newInfos, transition);
     _willTransition(oldInfos, newInfos, transition);
   };
   const replacementDidTransition = function didTransition(oldInfos, newInfos, transition) {
-    // console.log('DID transition: ', oldInfos, newInfos, transition);
     _didTransition(oldInfos, newInfos, transition);
   };
 
@@ -75,7 +73,6 @@ export function initialize(app) {
         });
     } else {
       // TODO handle other states
-      console.log(postChange['@router'].get('state'));
     }
   };
   redux.subscribe(changeListener.bind(this));
