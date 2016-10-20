@@ -1663,6 +1663,12 @@ ember-export-application-global@^1.0.5:
   dependencies:
     ember-cli-babel "^5.1.10"
 
+ember-getowner-polyfill@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/ember-getowner-polyfill/-/ember-getowner-polyfill-1.0.1.tgz#f60a31d25d642461dac4b4746184afaf7f5084ae"
+  dependencies:
+    ember-cli-babel "^5.1.5"
+
 ember-immutable@0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/ember-immutable/-/ember-immutable-0.1.1.tgz#fa03f420fa87184712e07f49e1ad87336f24b50e"
@@ -4936,6 +4942,13 @@ uglify-js@^2.6, uglify-js@^2.6.0:
 uglify-to-browserify@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/uglify-to-browserify/-/uglify-to-browserify-1.0.2.tgz#6e0924d6bda6b5afe349e39a6d632850a0f882b7"
+
+ui-navigator-service:
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/ui-navigator-service/-/ui-navigator-service-0.3.8.tgz#d7f7ee905cbb36afcc90affd266446bebdfa164f"
+  dependencies:
+    ember-cli-babel "^5.1.5"
+    ember-getowner-polyfill "1.0.1"
 
 uid-number@0.0.6:
   version "0.0.6"

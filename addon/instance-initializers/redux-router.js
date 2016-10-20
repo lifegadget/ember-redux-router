@@ -1,7 +1,8 @@
 import Ember from 'ember';
 import routeReducer from 'ember-redux-router/redux/reducers/route-reducer';
+import * as actions from 'ember-redux-router/redux/actions/router-actions';
 
-const { get, set, typeOf } = Ember;
+const {isEmpty, typeOf } = Ember;
 
 const errorHandler = (error, transition) => {
   this.get('redux').dispatch({
@@ -25,76 +26,59 @@ const getParameters = function getParameters(stuff = []) {
     : { dynamicSegments: stuff.slice(0, -1), options: {} };
 };
 
-
 export function initialize(app) {
   const router = app.lookup('router:main');
   const redux = app.lookup('service:redux');
+  const navigator = app.lookup('service:navigator');
   const _transitionTo = router.transitionTo.bind(router);
-
-  const replacementTransitionTo = function transitionTo(name, ...rest) {
-    return redux.dispatch(transitionActionThunk(name, ...rest)(redux.dispatch.bind(redux)));
-  };
-
-  // Add reducer and intercept route transition
-  redux._transitionTo = _transitionTo;
-  router.transitionTo = replacementTransitionTo.bind(router);
+  const _willTransition = router.willTransition.bind(router);
+  const _didTransition = router.didTransition.bind(router);
   redux.addAddonReducer('@router', routeReducer);
 
-  /**
-   * Returns a "thunk" for all async aspects of the transition
-   * Note: this necessitates that a thunk middleware
-   * is in place to handle this
-   */
-  const transitionActionThunk = (name, ...rest) => (dispatch) => {
-    const { dynamicSegments, options } = getParameters(rest);
-    const transition = _transitionTo(name, ...rest);
-    console.log('starting thunk', dynamicSegments, options);
-    dispatch({
-      type: '@ROUTER:TRANSITION_REQUESTED',
-      name,
-      dynamicSegments,
-      options,
-      transition
-    });
-
-    transition
-      .then(data => {
-        dispatch({
-          type: '@ROUTER:TRANSITION_COMPLETED',
-          routeName: data.routeName,
-          name,
-          dynamicSegments,
-          options
-        });
-      })
-      .catch(err => {
-
-      });
-
-    // based on structure of transition we can determine whether transition has
-    // been accepted
-    console.log(transition);
-    transition
-      .then(data => {
-        console.log('transition promise', data);
-        dispatch({
-          type: '@ROUTER:TRANSITION_COMPLETED',
-          routeName: data.routeName,
-          name,
-          dynamicSegments
-        });
-      })
-      .catch(err => {
-        dispatch({
-          type: '@ROUTER:TRANSITION_ERROR',
-          error: err,
-          name,
-          dynamicSegments,
-          options
-        });
-      });
-
+  const replacementTransitionTo = function transitionTo(...args) {
+    console.log('dispatching', actions.requestTransition(navigator, args));
+    redux.dispatch(actions.requestTransition(navigator, args));
   };
+  const replacementWillTransition = function willTransition(oldInfos, newInfos, transition) {
+    // console.log('will transition: ', oldInfos, newInfos, transition);
+    _willTransition(oldInfos, newInfos, transition);
+  };
+  const replacementDidTransition = function didTransition(oldInfos, newInfos, transition) {
+    // console.log('DID transition: ', oldInfos, newInfos, transition);
+    _didTransition(oldInfos, newInfos, transition);
+  };
+
+  // Intercept
+  router._transitionTo = _transitionTo;
+  router.transitionTo = replacementTransitionTo.bind(router);
+  router.willTransition = replacementWillTransition.bind(router);
+  router.didTransition = replacementDidTransition.bind(router);
+
+  // Listen for state changes
+  const changeListener = (pre, postChange, change) => {
+    if(postChange['@router'].get('state') === 'requesting-change') {
+      const { requestedName, requestedDynamicSegments, requestedOptions } = postChange['@router'].toJS();
+      const args = [];
+      if (requestedDynamicSegments.length > 0) { args.push(requestedDynamicSegments); }
+      if (Object.keys(requestedOptions).length > 0) { args.push(requestedOptions); }
+      const transitionState = args.length > 0
+        ? router._transitionTo(requestedName,  ...args)
+        : router._transitionTo(requestedName[0]);
+
+      redux.dispatch(actions.transitioning());
+      transitionState
+        .then(data => {
+          redux.dispatch(actions.successfulTransition(navigator, data));
+        })
+        .catch(err => {
+          redux.dipatch(actions.failedTransition(navigator, err));
+        });
+    } else {
+      // TODO handle other states
+      console.log(postChange['@router'].get('state'));
+    }
+  };
+  redux.subscribe(changeListener.bind(this));
 }
 
 export default {

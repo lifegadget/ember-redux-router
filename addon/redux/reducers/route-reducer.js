@@ -1,9 +1,10 @@
+import Immutable from 'immutable';
+
 const routeReducer = (state, action) => {
-  console.log('route reducer', action);
 
   const defaultValue = {
     name: 'index',
-    model: 'index',
+    model: undefined,
     options: {}
   };
 
@@ -11,26 +12,33 @@ const routeReducer = (state, action) => {
     case '@ROUTER:TRANSITION_REQUESTED':
       console.log('transition requested');
 
-      return {
-        state: 'change-requested',
-        transition: action.transition,
-        lastUpdated: new Date(),
-      };
+      return Immutable.OrderedMap(action)
+        .delete('type')
+        .set('requestedAt', new Date())
+        .set('lastUpdated', undefined);
 
-    case '@ROUTER:TRANSITION_COMPLETED':
-      return {
-        url: 'xyz',
-        route: 'x.y.z',
-        state: 'transitioned',
-      };
+    case '@ROUTER:TRANSITIONING':
+
+      return Immutable.OrderedMap(action)
+        .delete('type')
+        .merge(state)
+        .set('state', 'transitioning');
+
+    case '@ROUTER:TRANSITION_SUCCESSFUL':
+      console.log('success');
+
+      return Immutable.OrderedMap(action)
+        .delete('type')
+        .merge(state)
+        .set('state', 'complete')
+        .set('lastUpdated', new Date());
 
     case '@ROUTER:TRANSITION_REJECTED':
-      return {
-        url: 'xyz',
-        route: 'x.y.z',
-        state: 'rejected',
-        transition: action.transition
-      };
+      return Immutable.OrderedMap(action)
+        .delete('type')
+        .merge(state)
+        .set('state', 'rejected')
+        .set('lastUpdated', new Date());
 
     default:
       return state || defaultValue;
