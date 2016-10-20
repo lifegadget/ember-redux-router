@@ -36,7 +36,6 @@ export function initialize(app) {
   redux.addAddonReducer('@router', routeReducer);
 
   const replacementTransitionTo = function transitionTo(...args) {
-    log('dispatching', actions.requestTransition(navigator, args));
     redux.dispatch(actions.requestTransition(navigator, args));
   };
   const replacementWillTransition = function willTransition(oldInfos, newInfos, transition) {

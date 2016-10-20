@@ -44,7 +44,7 @@ export const transitioning = function transitioning() {
 export const successfulTransition = function successfulTransition(navigator) {
   return {
     type: '@ROUTER:TRANSITION_SUCCESSFUL',
-    state: 'success',
+    state: 'completed',
     route: get(navigator, 'currentPath'),
     routeContexts: get(navigator, 'routeContexts'),
     routeIsIndex: get(navigator, 'isIndexRoute'),
@@ -55,6 +55,7 @@ export const successfulTransition = function successfulTransition(navigator) {
 export const failedTransition = function failedTransition(navigator, err) {
   return {
     type: '@ROUTER:TRANSITION_FAILED',
+    state: 'static-after-failure',
     error: err
   };
 };

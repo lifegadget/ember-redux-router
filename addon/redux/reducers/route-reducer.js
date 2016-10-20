@@ -2,11 +2,11 @@ import Immutable from 'immutable';
 
 const routeReducer = (state, action) => {
 
-  const defaultValue = {
-    name: 'index',
-    model: undefined,
-    options: {}
-  };
+  const defaultValue = Immutable.OrderedMap({
+    route: 'index',
+    url: '/',
+    state: 'initial'
+  });
 
   switch(action.type) {
     case '@ROUTER:TRANSITION_REQUESTED':
@@ -24,8 +24,7 @@ const routeReducer = (state, action) => {
     case '@ROUTER:TRANSITION_SUCCESSFUL':
       return Immutable.OrderedMap(action)
         .delete('type')
-        .merge(state)
-        .set('state', 'complete')
+        .set('requestedAt', state.get('requestedAt'))
         .set('lastUpdated', new Date());
 
     case '@ROUTER:TRANSITION_REJECTED':
