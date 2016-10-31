@@ -19,36 +19,34 @@ const getParameters = function getParameters(stuff) {
 };
 
 
-export const requestTransition = function requestTransition(navigator, name, ...rest) {
-  const { dynamicSegments, options } = getParameters(rest);
+export const requestTransition = function requestTransition(oldRoute, newRoute, transition) {
+  const oldClone = oldRoute.slice(0).pop();
+  const newClone = newRoute.slice(0).pop();
+  const currentRoute = oldRoute && oldRoute.length > 0 ? oldClone.name : '';
+  const requestedRoute = newClone.name;
   return {
     type: '@ROUTER:TRANSITION_REQUESTED',
-    state: 'requesting-change',
-    route: get(navigator, 'currentPath'),
-    routeContexts: get(navigator, 'routeContexts'),
-    routeIsIndex: get(navigator, 'isIndexRoute'),
-    url: get(navigator, 'signature'),
-    requestedName: name,
-    requestedDynamicSegments: dynamicSegments,
-    requestedOptions: options,
+    state: 'transition-requested',
+    route: currentRoute,
+    requested: {
+      route: requestedRoute,
+      params: newClone.params
+    }
   };
 };
 
-export const transitioning = function transitioning() {
-  return {
-    type: '@ROUTER:TRANSITIONING',
-    state: 'transitioning'
-  };
-};
-
-export const successfulTransition = function successfulTransition(navigator) {
+export const successfulTransition = function successfulTransition(oldRoute, newRoute, transition) {
+  const context = oldRoute.slice(0).pop();
+  const route = context.name;
+  const params = context.params;
   return {
     type: '@ROUTER:TRANSITION_SUCCESSFUL',
-    state: 'completed',
-    route: get(navigator, 'currentPath'),
-    routeContexts: get(navigator, 'routeContexts'),
-    routeIsIndex: get(navigator, 'isIndexRoute'),
-    url: get(navigator, 'signature')
+    state: 'transitioned',
+    params,
+    route,
+    // routeContexts: get(navigator, 'routeContexts'),
+    // routeIsIndex: get(navigator, 'isIndexRoute'),
+    // url: get(navigator, 'signature')
   };
 };
 

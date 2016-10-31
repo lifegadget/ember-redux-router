@@ -7,6 +7,13 @@ const Router = Ember.Router.extend({
 });
 
 Router.map(function() {
+  this.route('foo');
+  this.route('bar');
+  this.route('baz', function() {
+    this.route('second');
+    this.route('dynamic', { path: 'dynamic/:dynamic_segment'});
+    this.route('hidden', { path: '/:hidden'});
+  });
 });
 
 export default Router;

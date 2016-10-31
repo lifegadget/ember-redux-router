@@ -3,9 +3,9 @@ import Immutable from 'immutable';
 const routeReducer = (state, action) => {
 
   const defaultValue = Immutable.OrderedMap({
-    route: 'index',
-    url: '/',
-    state: 'initial'
+    route: null,
+    params: {},
+    state: 'initializing'
   });
 
   switch(action.type) {

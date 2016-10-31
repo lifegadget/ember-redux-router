@@ -2,57 +2,32 @@ import Ember from 'ember';
 import routeReducer from 'ember-redux-router/redux/reducers/route-reducer';
 import * as actions from 'ember-redux-router/redux/actions/router-actions';
 
-const {isEmpty, typeOf } = Ember;
-
-const errorHandler = (error, transition) => {
-  this.get('redux').dispatch({
-    type: '@ROUTER:TRANSITION_REJECTED',
-    error,
-    transition
-  });
-};
-
-/**
- * getParameters
- *
- * takes all the possible inputs to "transitionTo" and boils it
- * down to a minimal set. Without this the transitionTo function will
- * complain for anything but the most complex routes
- */
-const getParameters = function getParameters(stuff = []) {
-  const hasOptions = typeOf(stuff[stuff.length - 1]) === 'object';
-  return hasOptions
-    ? { dynamicSegments: stuff.slice(0, -1), options: stuff.slice(-1) }
-    : { dynamicSegments: stuff.slice(0, -1), options: {} };
-};
-
 export function initialize(app) {
   const router = app.lookup('router:main');
   const redux = app.lookup('service:redux');
   const navigator = app.lookup('service:navigator');
-  const _transitionTo = router.transitionTo.bind(router);
   const _willTransition = router.willTransition.bind(router);
   const _didTransition = router.didTransition.bind(router);
   redux.addAddonReducer('@router', routeReducer);
 
-  const replacementTransitionTo = function transitionTo(...args) {
-    redux.dispatch(actions.requestTransition(navigator, args));
+  const replacementWillTransition = function willTransition(oldRoute, newRoute, transition) {
+    console.log('will transition', oldRoute, newRoute, transition);
+    redux.dispatch(actions.requestTransition(oldRoute, newRoute, transition));
+    _willTransition(oldRoute, newRoute, transition);
   };
-  const replacementWillTransition = function willTransition(oldInfos, newInfos, transition) {
-    _willTransition(oldInfos, newInfos, transition);
-  };
-  const replacementDidTransition = function didTransition(oldInfos, newInfos, transition) {
-    _didTransition(oldInfos, newInfos, transition);
+  const replacementDidTransition = function didTransition(...args) {
+    const [oldRoute, newRoute, transition] = args;
+    console.log('did transition', oldRoute, newRoute);
+    redux.dispatch(actions.successfulTransition(oldRoute, newRoute, transition));
+    _didTransition(oldRoute, newRoute, transition);
   };
 
   // Intercept
-  router._transitionTo = _transitionTo;
-  router.transitionTo = replacementTransitionTo.bind(router);
   router.willTransition = replacementWillTransition.bind(router);
   router.didTransition = replacementDidTransition.bind(router);
 
   // Listen for state changes
-  const changeListener = (pre, postChange, change) => {
+  const changeListener = (pre, postChange /** , change */ ) => {
     if(postChange['@router'].get('state') === 'requesting-change') {
       const { requestedName, requestedDynamicSegments, requestedOptions } = postChange['@router'].toJS();
       const args = [];

@@ -1,0 +1,14 @@
+<h1>Link TO:</h1>
+
+{{#link-to 'index'}}Index{{/link-to}}
+{{#link-to 'foo'}}Foo{{/link-to}}
+{{#link-to 'bar'}}Bar{{/link-to}}
+{{#link-to 'baz.dynamic' 'foobar'}}Baz/Dynamic(foobar){{/link-to}}
+{{#link-to 'baz.hidden' 'foobar'}}Baz/Hidden(foobar){{/link-to}}
+
+<p>
+  <h1>TransitionTo</h1>
+  <span class="link" onclick={{action 'navigate' 'baz'}}>Baz</span>
+  <span class="link" onclick={{action 'navigate' 'baz.second'}}>Baz/Second</span>
+</p>
+
