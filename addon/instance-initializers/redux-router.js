@@ -11,15 +11,12 @@ export function initialize(app) {
   redux.addAddonReducer('@router', routeReducer);
 
   const replacementWillTransition = function willTransition(oldRoute, newRoute, transition) {
-    console.log('will transition', oldRoute, newRoute, transition);
-    redux.dispatch(actions.requestTransition(oldRoute, newRoute, transition));
-    _willTransition(oldRoute, newRoute, transition);
+    redux.dispatch(actions.requestTransition(_willTransition, oldRoute, newRoute, transition));
   };
+
   const replacementDidTransition = function didTransition(...args) {
     const [oldRoute, newRoute, transition] = args;
-    console.log('did transition', oldRoute, newRoute);
-    redux.dispatch(actions.successfulTransition(oldRoute, newRoute, transition));
-    _didTransition(oldRoute, newRoute, transition);
+    redux.dispatch(actions.successfulTransition(_didTransition, oldRoute, newRoute, transition));
   };
 
   // Intercept

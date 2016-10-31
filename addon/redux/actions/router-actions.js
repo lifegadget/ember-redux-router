@@ -19,11 +19,12 @@ const getParameters = function getParameters(stuff) {
 };
 
 
-export const requestTransition = function requestTransition(oldRoute, newRoute, transition) {
+export const requestTransition = function requestTransition(willTransition, oldRoute, newRoute, transition) {
   const oldClone = oldRoute.slice(0).pop();
   const newClone = newRoute.slice(0).pop();
   const currentRoute = oldRoute && oldRoute.length > 0 ? oldClone.name : '';
   const requestedRoute = newClone.name;
+  willTransition(oldRoute, newRoute, transition);
   return {
     type: '@ROUTER:TRANSITION_REQUESTED',
     state: 'transition-requested',
@@ -35,18 +36,16 @@ export const requestTransition = function requestTransition(oldRoute, newRoute, 
   };
 };
 
-export const successfulTransition = function successfulTransition(oldRoute, newRoute, transition) {
+export const successfulTransition = function successfulTransition(didTransition, oldRoute, newRoute, transition) {
   const context = oldRoute.slice(0).pop();
   const route = context.name;
   const params = context.params;
+  didTransition(oldRoute, newRoute, transition);
   return {
     type: '@ROUTER:TRANSITION_SUCCESSFUL',
     state: 'transitioned',
     params,
-    route,
-    // routeContexts: get(navigator, 'routeContexts'),
-    // routeIsIndex: get(navigator, 'isIndexRoute'),
-    // url: get(navigator, 'signature')
+    route
   };
 };
 
